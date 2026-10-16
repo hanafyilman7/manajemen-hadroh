@@ -1,5 +1,7 @@
 'use strict';
 /* ===== Util & State ===== */
+const KOP0 = {nama: 'Hadroh Al-Barokah', tagline: 'Hadroh & Sholawat untuk Berbagai Acara', alamat: '', telp: '', email: '', rek: '', ttd: '', catatan: 'Mohon pembayaran sisa dilunasi paling lambat pada hari acara. Terima kasih atas kepercayaan Anda.'};
+const getKop = () => ({...KOP0, ...(settings.kop || {})});
 const KEY = 'hadroh_jobs_v1', SKEY = 'hadroh_settings_v1';
 const BULAN = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 const HARI = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
@@ -27,6 +29,7 @@ async function loadAll() {
   const err = j.error || t.error || s.error; if (err) throw err;
   jobs = j.data.map(r => r.data); trx = t.data.map(r => r.data);
   if (s.data[0] && s.data[0].data && Array.isArray(s.data[0].data.grups)) settings = s.data[0].data;
+  settings.kop = getKop();
   snap.jobs = {}; jobs.forEach(x => snap.jobs[x.id] = JSON.stringify(x));
   snap.transaksi = {}; trx.forEach(x => snap.transaksi[x.id] = JSON.stringify(x));
 }
@@ -152,7 +155,7 @@ function renderList() {
     (l.length ? l.map(j => `<tr class="${bt.has(j.id) ? 'bentrok' : ''}"><td>${esc(j.id)}</td><td>${fd(j.tanggal)}</td><td>${esc(j.mulai)}–${esc(j.selesai)}</td>
     <td><b>${esc(j.acara)}</b><br>${esc(j.pemesan)}</td><td>${esc(j.tempat)}</td><td>${esc(j.grup)}${bt.has(j.id) ? '<br><span class="badge b-dibatalkan">Bentrok</span>' : ''}</td>
     <td>${rp(j.honor)}<br><small class="muted">Sisa ${rp(sisa(j))}</small></td><td>${badgeJob(j.statusJob)}<br>${badgeBayar(j.statusBayar)}</td>
-    <td class="acts"><button class="btn sm" data-detail="${esc(j.id)}" title="Lihat">👁️</button><button class="btn sm" data-edit="${esc(j.id)}" title="Edit">✏️</button><button class="btn sm danger" data-del="${esc(j.id)}" title="Hapus">🗑️</button></td></tr>`).join('')
+    <td class="acts"><button class="btn sm" data-detail="${esc(j.id)}" title="Lihat">👁️</button><button class="btn sm" data-inv="${esc(j.id)}" title="Cetak invoice">🧾</button><button class="btn sm" data-edit="${esc(j.id)}" title="Edit">✏️</button><button class="btn sm danger" data-del="${esc(j.id)}" title="Hapus">🗑️</button></td></tr>`).join('')
     : '<tr><td colspan="9" class="empty">Tidak ada data job.</td></tr>');
 }
 function jobRow(j) { return [j.id, j.pemesan, j.wa, j.acara, j.jenis, j.tanggal, j.mulai, j.selesai, j.tempat, j.alamat, j.grup, j.koordinator, j.honor, j.dp, sisa(j), j.statusBayar, j.statusJob, j.catatan]; }
@@ -160,7 +163,7 @@ const CSV_HEAD = ['ID','Pemesan','WhatsApp','Acara','Jenis','Tanggal','Mulai','S
 function showDetail(id) {
   const j = jobs.find(x => x.id === id); if (!j) return;
   const rows = [['ID', j.id], ['Pemesan', j.pemesan], ['WhatsApp', `<a style="color:#d4af37" target="_blank" rel="noopener" href="https://wa.me/${esc(normWA(j.wa))}">${esc(j.wa)}</a>`], ['Acara', `${j.acara} (${j.jenis})`], ['Tanggal', fd(j.tanggal)], ['Waktu', j.mulai + ' – ' + j.selesai], ['Tempat', j.tempat], ['Alamat', j.alamat], ['Grup', j.grup], ['Koordinator', j.koordinator], ['Honor', rp(j.honor)], ['DP', rp(j.dp)], ['Sisa', rp(sisa(j))], ['Pembayaran', j.statusBayar], ['Status Job', j.statusJob], ['Catatan', j.catatan || '-']];
-  modal({title: 'Detail Job', html: '<dl class="dl">' + rows.map(([k, v]) => `<dt>${k}</dt><dd>${k === 'WhatsApp' ? v : esc(v)}</dd>`).join('') + '</dl>', ok: 'Tutup', cancel: ''});
+  modal({title: 'Detail Job', html: '<dl class="dl">' + rows.map(([k, v]) => `<dt>${k}</dt><dd>${k === 'WhatsApp' ? v : esc(v)}</dd>`).join('') + '</dl>' + `<div class="toolbar"><button class="btn gold" data-inv="${esc(j.id)}">🧾 Cetak Invoice</button></div>`, ok: 'Tutup', cancel: ''});
 }
 async function hapus(id) {
   const j = jobs.find(x => x.id === id); if (!j) return;
@@ -241,6 +244,7 @@ function renderLaporan() {
 /* ===== Pengaturan ===== */
 function renderSettings() {
   $('#setGrup').value = settings.grups.join('\n');
+  const k = getKop(); [['Nama','nama'],['Tagline','tagline'],['Alamat','alamat'],['Telp','telp'],['Email','email'],['Rek','rek'],['Ttd','ttd'],['Catatan','catatan']].forEach(([id, f]) => { const el = $('#kop' + id); if (el && document.activeElement !== el) el.value = k[f]; });
   $('#dlGrup').innerHTML = [...new Set([...settings.grups, ...jobs.map(j => j.grup)])].map(g => `<option value="${esc(g)}">`).join('');
 }
 function restore(file) {
@@ -263,7 +267,7 @@ function restore(file) {
 
 /* ===== Event ===== */
 document.addEventListener('click', e => {
-  const t = e.target.closest('[data-view],[data-go],[data-cal],[data-day],[data-detail],[data-edit],[data-del]'); if (!t) return;
+  const t = e.target.closest('[data-view],[data-go],[data-cal],[data-day],[data-detail],[data-edit],[data-del],[data-inv]'); if (!t) return;
   const d = t.dataset;
   if (d.view) { editId = null; show(d.view); }
   else if (d.go) { editId = null; show(d.go); }
@@ -277,6 +281,7 @@ document.addEventListener('click', e => {
   else if (d.detail) showDetail(d.detail);
   else if (d.edit) editJob(d.edit);
   else if (d.del) hapus(d.del);
+  else if (d.inv) cetakInvoice(d.inv);
 });
 ['q', 'fBulan', 'fStatus', 'fBayar'].forEach(id => $('#' + id).addEventListener('input', renderList));
 $('#fReset').onclick = () => { ['q', 'fBulan', 'fStatus', 'fBayar'].forEach(id => $('#' + id).value = ''); renderList(); };
@@ -344,6 +349,57 @@ $('#tblKas').addEventListener('click', async e => {
 });
 $('#btnCsvKas').onclick = () => { download('buku-kas-hadroh.csv', csv(['Tanggal', 'Jenis', 'Kategori', 'Keterangan', 'Jumlah', 'Job', 'Sumber'], keuRows().map(t => [t.tanggal, t.jenis === 'masuk' ? 'Pemasukan' : 'Pengeluaran', t.kategori, t.keterangan, t.jumlah, t.jobId || '', t.auto ? 'Otomatis' : 'Manual'])), 'text/csv;charset=utf-8'); toast('CSV buku kas diekspor.'); };
 $('#kTgl').value = today(); fillKat();
+
+/* ===== Cetak Invoice & Buku Kas ===== */
+const fdl = s => s ? new Date(s + 'T00:00:00').toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'}) : '-';
+function kopHTML() {
+  const k = getKop(), kontak = [k.telp && '📞 ' + esc(k.telp), k.email && '✉️ ' + esc(k.email)].filter(Boolean).join(' &nbsp; ');
+  return `<div class="kop"><div class="lg">🕌</div><div><h2>${esc(k.nama).toUpperCase()}</h2>${k.tagline ? `<p><i>${esc(k.tagline)}</i></p>` : ''}${k.alamat ? `<p>${esc(k.alamat)}</p>` : ''}${kontak ? `<p>${kontak}</p>` : ''}</div></div>`;
+}
+function printDoc(html) {
+  $('#printDoc').innerHTML = '<div class="doc">' + html + '</div>';
+  document.body.classList.add('doc-mode'); $('#modal').hidden = true;
+  const end = () => { document.body.classList.remove('doc-mode'); window.removeEventListener('afterprint', end); };
+  window.addEventListener('afterprint', end);
+  setTimeout(() => window.print(), 100);
+}
+function cetakInvoice(id) {
+  const j = jobs.find(x => x.id === id); if (!j) return;
+  const k = getKop(), lunas = j.statusBayar === 'lunas', batal = !aktif(j);
+  const no = `INV/${String(j.id).replace(/\D/g, '').padStart(3, '0')}/${j.tanggal.slice(0, 4)}${j.tanggal.slice(5, 7)}`;
+  printDoc(kopHTML() + `
+    <div class="jdl"><h3>INVOICE</h3><div>No. Invoice: <b>${esc(no)}</b><br>Tanggal terbit: ${fdl(today())}</div></div>
+    <table class="plain"><tr><td>Kepada Yth.</td><td><b>${esc(j.pemesan)}</b></td></tr><tr><td>WhatsApp</td><td>${esc(j.wa)}</td></tr></table>
+    <table><tr><th style="width:36px">No</th><th>Uraian</th><th class="r" style="width:150px">Jumlah</th></tr>
+      <tr><td>1</td><td><b>Jasa ${esc(j.grup)}</b> – ${esc(j.acara)} (${esc(j.jenis)})<br>
+        ${fdl(j.tanggal)}, pukul ${esc(j.mulai)}–${esc(j.selesai)} WIB<br>${esc(j.tempat)}, ${esc(j.alamat)}</td><td class="r">${rp(j.honor)}</td></tr>
+      <tr class="tot"><td colspan="2" class="r">Total Tagihan</td><td class="r">${rp(j.honor)}</td></tr>
+      <tr><td colspan="2" class="r">Uang muka / pembayaran diterima</td><td class="r">${rp(j.dp)}</td></tr>
+      <tr class="tot"><td colspan="2" class="r">Sisa Pembayaran</td><td class="r">${rp(sisa(j))}</td></tr></table>
+    <p>${lunas ? '<span class="stamp">LUNAS</span>' : `Status pembayaran: <b>${esc(j.statusBayar)}</b>`}${batal ? ' &nbsp; <b>(Job dibatalkan)</b>' : ''}</p>
+    ${k.rek ? `<p class="note"><b>Pembayaran ke rekening:</b> ${esc(k.rek)}</p>` : ''}
+    ${k.catatan ? `<p class="note">${esc(k.catatan)}</p>` : ''}
+    <div class="ttd"><div>Penerima,<div class="sp"></div>( ${esc(j.pemesan)} )</div><div>Hormat kami,<div class="sp"></div>( ${esc(k.ttd || j.koordinator)} )</div></div>`);
+}
+function cetakKas() {
+  const r = keuRows(), a = $('#kDari').value, b = $('#kSampai').value; let masuk = 0, keluar = 0, saldo = 0;
+  const periode = a || b ? `${a ? fdl(a) : 'Awal'} s.d. ${b ? fdl(b) : 'Sekarang'}` : 'Semua periode';
+  const body = r.map(t => { if (t.jenis === 'masuk') masuk += t.jumlah; else keluar += t.jumlah; saldo = masuk - keluar;
+    return `<tr><td>${fdl(t.tanggal)}</td><td>${esc(t.keterangan)}${t.jobId ? ` <small>(${esc(t.jobId)})</small>` : ''}<br><small>${esc(t.kategori)}</small></td><td class="r">${t.jenis === 'masuk' ? rp(t.jumlah) : ''}</td><td class="r">${t.jenis === 'keluar' ? rp(t.jumlah) : ''}</td><td class="r">${rp(saldo)}</td></tr>`; }).join('');
+  printDoc(kopHTML() + `
+    <div class="jdl"><h3 style="font-size:16pt">LAPORAN BUKU KAS</h3><div>Periode: <b>${periode}</b><br>Dicetak: ${fdl(today())}</div></div>
+    <table><tr><th>Tanggal</th><th>Keterangan</th><th class="r">Masuk</th><th class="r">Keluar</th><th class="r">Saldo</th></tr>
+      ${body || '<tr><td colspan="5" style="text-align:center">Tidak ada transaksi pada periode ini.</td></tr>'}
+      <tr class="tot"><td colspan="2" class="r">TOTAL</td><td class="r">${rp(masuk)}</td><td class="r">${rp(keluar)}</td><td class="r">${rp(masuk - keluar)}</td></tr></table>
+    <p class="note">Pemasukan dari job dihitung dari DP/pembayaran job aktif pada tanggal acara.</p>
+    <div class="ttd"><div>Mengetahui,<div class="sp"></div>( ........................ )</div><div>Bendahara,<div class="sp"></div>( ${esc(getKop().ttd || '........................')} )</div></div>`);
+}
+$('#btnCetakKas').onclick = cetakKas;
+$('#btnSimpanKop').onclick = () => {
+  const v = id => $('#kop' + id).value.trim();
+  settings.kop = {nama: v('Nama') || KOP0.nama, tagline: v('Tagline'), alamat: v('Alamat'), telp: v('Telp'), email: v('Email'), rek: v('Rek'), ttd: v('Ttd'), catatan: v('Catatan')};
+  save(); toast('Kop invoice disimpan.');
+};
 
 const showLogin = msg => { $('#lErr').textContent = msg || ''; $('#login').hidden = false; };
 async function enter(user) {

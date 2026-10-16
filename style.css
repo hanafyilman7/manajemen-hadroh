@@ -64,3 +64,33 @@ tr.bentrok td:first-child{box-shadow:inset 3px 0 0 var(--red)}
 body.viewer [data-view="tambah"],body.viewer [data-go="tambah"],body.viewer [data-edit],body.viewer [data-del],body.viewer [data-tdel],body.viewer #kForm,body.viewer .admin-only{display:none!important}
 #akunInfo{color:var(--muted);font-size:.8rem}
 @media(max-width:900px){#akunInfo{display:none}}
+
+/* ===== Cetak invoice & buku kas ===== */
+#printDoc{display:none}
+.doc{font-family:Georgia,'Times New Roman',serif;color:#000;background:#fff;font-size:12pt;line-height:1.4}
+.doc .kop{display:flex;align-items:center;gap:14px;border-bottom:3px double #064e3b;padding-bottom:10px;margin-bottom:14px}
+.doc .kop .lg{font-size:40pt;line-height:1}
+.doc .kop h2{margin:0;font-size:18pt;color:#064e3b;letter-spacing:.5px}
+.doc .kop p{margin:1px 0;font-size:10pt;color:#222}
+.doc .jdl{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:12px}
+.doc .jdl h3{margin:0;font-size:20pt;letter-spacing:3px;color:#064e3b}
+.doc .jdl div{text-align:right;font-size:10.5pt}
+.doc table{width:100%;border-collapse:collapse;font-size:10.5pt;margin-bottom:12px}
+.doc th,.doc td{border:1px solid #555;padding:6px 8px;text-align:left;vertical-align:top;color:#000;background:#fff;position:static}
+.doc th{background:#e7f1ec;color:#064e3b}
+.doc td.r,.doc th.r{text-align:right}
+.doc table.plain td{border:0;padding:2px 6px 2px 0}
+.doc table.plain td:first-child{width:130px;color:#333}
+.doc .tot td{font-weight:bold;background:#f3f3f3}
+.doc .stamp{display:inline-block;border:3px solid #15803d;color:#15803d;font-weight:bold;font-size:18pt;padding:2px 14px;transform:rotate(-6deg);letter-spacing:2px}
+.doc .ttd{display:flex;justify-content:space-between;margin-top:30px;font-size:11pt}
+.doc .ttd div{text-align:center;min-width:180px}.doc .ttd .sp{height:70px}
+.doc .note{font-size:10pt;color:#333;margin-top:10px}
+@media print{
+  @page{size:A4;margin:16mm}
+  body.doc-mode>*:not(#printDoc){display:none!important}
+  body.doc-mode #printDoc{display:block!important}
+  body.doc-mode{display:block;background:#fff}
+  #printDoc .doc th,#printDoc .doc td,#printDoc .doc th:last-child,#printDoc .doc td:last-child{display:table-cell!important}
+  .doc tr{page-break-inside:avoid}
+}

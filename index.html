@@ -122,6 +122,7 @@
         <label class="inline">Sampai <input id="kSampai" type="date"></label>
         <button class="btn" id="kReset">Semua Periode</button>
         <button class="btn" id="btnCsvKas">⬇️ Ekspor CSV</button>
+        <button class="btn" id="btnCetakKas">🖨️ Cetak Buku Kas</button>
       </div>
       <p class="muted">Pemasukan dari job dihitung otomatis dari DP/pembayaran job (selain yang dibatalkan), bertanggal sesuai tanggal acara. Piutang = total sisa pembayaran seluruh job aktif.</p>
       <div class="stats" id="kStat"></div>
@@ -148,6 +149,21 @@
       <p class="muted">Satu nama grup per baris. Dipakai sebagai saran pada formulir.</p>
       <textarea id="setGrup" rows="4"></textarea>
       <div class="toolbar"><button class="btn gold" id="btnSimpanGrup">Simpan Daftar Grup</button></div>
+    </div>
+    <div class="card admin-only">
+      <h3>Kop Invoice &amp; Laporan</h3>
+      <p class="muted">Tampil di bagian atas invoice dan cetakan buku kas. Kolom yang dikosongkan tidak ditampilkan.</p>
+      <div class="form-grid">
+        <label>Nama Grup / Usaha<input id="kopNama"></label>
+        <label>Slogan / Keterangan<input id="kopTagline" placeholder="Hadroh &amp; Sholawat"></label>
+        <label class="full">Alamat<textarea id="kopAlamat" rows="2"></textarea></label>
+        <label>Telepon / WhatsApp<input id="kopTelp"></label>
+        <label>Email<input id="kopEmail"></label>
+        <label>Rekening Pembayaran<input id="kopRek" placeholder="BSI 1234567890 a.n. Nama"></label>
+        <label>Nama Penandatangan<input id="kopTtd" placeholder="Kosong = nama koordinator job"></label>
+        <label class="full">Catatan di Invoice<textarea id="kopCatatan" rows="2"></textarea></label>
+      </div>
+      <div class="toolbar"><button class="btn gold" id="btnSimpanKop">Simpan Kop</button></div>
     </div>
     <div class="card admin-only">
       <h3>Cadangkan &amp; Pulihkan</h3>
@@ -185,6 +201,7 @@
     <button class="btn gold" type="submit">Masuk</button>
   </form>
 </div>
+<div id="printDoc"></div>
 <div id="toasts"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="config.js"></script>
