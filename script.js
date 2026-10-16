@@ -354,7 +354,7 @@ $('#kTgl').value = today(); fillKat();
 const fdl = s => s ? new Date(s + 'T00:00:00').toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'}) : '-';
 function kopHTML() {
   const k = getKop(), kontak = [k.telp && '📞 ' + esc(k.telp), k.email && '✉️ ' + esc(k.email)].filter(Boolean).join(' &nbsp; ');
-  return `<div class="kop"><div class="lg">🕌</div><div><h2>${esc(k.nama).toUpperCase()}</h2>${k.tagline ? `<p><i>${esc(k.tagline)}</i></p>` : ''}${k.alamat ? `<p>${esc(k.alamat)}</p>` : ''}${kontak ? `<p>${kontak}</p>` : ''}</div></div>`;
+  return `<div class="kop"><div class="lg"><img src="logo.png" alt="" style="height:70px;width:auto"></div><div><h2>${esc(k.nama).toUpperCase()}</h2>${k.tagline ? `<p><i>${esc(k.tagline)}</i></p>` : ''}${k.alamat ? `<p>${esc(k.alamat)}</p>` : ''}${kontak ? `<p>${kontak}</p>` : ''}</div></div>`;
 }
 function printDoc(html) {
   $('#printDoc').innerHTML = '<div class="doc">' + html + '</div>';
