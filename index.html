@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sistem Informasi Penjadwalan Job Hadroh</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<aside class="sidebar">
+  <div class="brand"><span class="logo">🕌</span><div><b>JOB HADROH</b><small>Sistem Penjadwalan</small></div></div>
+  <nav id="nav">
+    <button data-view="dashboard"><i>📊</i><span>Dashboard</span></button>
+    <button data-view="jadwal"><i>🎵</i><span>Jadwal Job</span></button>
+    <button data-view="tambah"><i>➕</i><span>Tambah Job</span></button>
+    <button data-view="kalender"><i>📅</i><span>Kalender</span></button>
+    <button data-view="pemesan"><i>👥</i><span>Data Pemesan</span></button>
+    <button data-view="laporan"><i>💰</i><span>Laporan Job</span></button>
+    <button data-view="keuangan"><i>💼</i><span>Keuangan</span></button>
+    <button data-view="pengaturan"><i>⚙️</i><span>Pengaturan</span></button>
+  </nav>
+</aside>
+
+<main>
+  <header class="topbar"><h1 id="judul">Dashboard</h1><span id="tglHariIni"></span><span id="akunInfo"></span><button class="btn sm" id="btnKeluar">Keluar</button></header>
+
+  <section class="view" id="v-dashboard">
+    <div class="stats">
+      <div class="stat"><i>🎵</i><b id="sTotal">0</b><span>Total Job</span></div>
+      <div class="stat"><i>📍</i><b id="sHariIni">0</b><span>Job Hari Ini</span></div>
+      <div class="stat"><i>📅</i><b id="sAkan">0</b><span>Akan Datang</span></div>
+      <div class="stat"><i>✅</i><b id="sSelesai">0</b><span>Selesai</span></div>
+      <div class="stat"><i>✖️</i><b id="sBatal">0</b><span>Dibatalkan</span></div>
+    </div>
+    <div class="grid2">
+      <div class="card"><h3>Kalender Bulanan</h3><div id="calDash"></div></div>
+      <div class="card"><h3>Job Terdekat</h3><div id="terdekat"></div></div>
+    </div>
+  </section>
+
+  <section class="view" id="v-jadwal" hidden>
+    <div class="card">
+      <div class="toolbar">
+        <input id="q" type="search" placeholder="🔍 Cari pemesan, tanggal, acara, lokasi">
+        <input id="fBulan" type="month" title="Filter bulan">
+        <select id="fStatus"><option value="">Semua status job</option><option value="menunggu">Menunggu</option><option value="dikonfirmasi">Dikonfirmasi</option><option value="selesai">Selesai</option><option value="dibatalkan">Dibatalkan</option></select>
+        <select id="fBayar"><option value="">Semua pembayaran</option><option value="belum bayar">Belum bayar</option><option value="DP">DP</option><option value="lunas">Lunas</option></select>
+        <button class="btn" id="fReset">Reset</button>
+      </div>
+      <div class="toolbar">
+        <button class="btn gold" data-go="tambah">➕ Tambah Job</button>
+        <button class="btn" id="btnCsv">⬇️ Ekspor CSV</button>
+        <button class="btn" id="btnCetak">🖨️ Cetak</button>
+        <span id="jumlahHasil" class="muted"></span>
+      </div>
+      <h2 class="print-only">Jadwal Job Hadroh</h2>
+      <div class="table-wrap"><table id="tblJadwal"></table></div>
+    </div>
+  </section>
+
+  <section class="view" id="v-tambah" hidden>
+    <form id="form" class="card" novalidate>
+      <h3 id="formJudul">Tambah Job Baru</h3>
+      <div class="form-grid">
+        <label>ID Job<input id="f-id" readonly></label>
+        <label>Nama Pemesan *<input id="f-pemesan" required></label>
+        <label>Nomor WhatsApp *<input id="f-wa" inputmode="tel" placeholder="08123456789"></label>
+        <label>Nama Acara *<input id="f-acara"></label>
+        <label>Jenis Acara *<select id="f-jenis"><option>Pernikahan</option><option>Khitanan</option><option>Maulid</option><option>Pengajian</option><option>Haul</option><option>Acara Lainnya</option></select></label>
+        <label>Tanggal Acara *<input id="f-tanggal" type="date"></label>
+        <label>Jam Mulai *<input id="f-mulai" type="time"></label>
+        <label>Jam Selesai *<input id="f-selesai" type="time"></label>
+        <label>Nama Tempat / Gedung *<input id="f-tempat"></label>
+        <label>Nama Grup Hadroh *<input id="f-grup" list="dlGrup"><datalist id="dlGrup"></datalist></label>
+        <label>Koordinator / Penanggung Jawab *<input id="f-koordinator"></label>
+        <label class="full">Alamat Lengkap Lokasi *<textarea id="f-alamat" rows="2"></textarea></label>
+        <label>Honor / Tarif (Rp) *<input id="f-honor" type="number" min="0" inputmode="numeric"></label>
+        <label>Uang Muka / DP (Rp)<input id="f-dp" type="number" min="0" inputmode="numeric" value="0"></label>
+        <label>Sisa Pembayaran<input id="f-sisa" readonly></label>
+        <label>Status Pembayaran<select id="f-statusBayar"><option value="belum bayar">Belum bayar</option><option value="DP">DP</option><option value="lunas">Lunas</option></select></label>
+        <label>Status Job<select id="f-statusJob"><option value="menunggu">Menunggu</option><option value="dikonfirmasi">Dikonfirmasi</option><option value="selesai">Selesai</option><option value="dibatalkan">Dibatalkan</option></select></label>
+        <label class="full">Catatan Tambahan<textarea id="f-catatan" rows="2"></textarea></label>
+      </div>
+      <div class="toolbar">
+        <button type="submit" class="btn gold">💾 Simpan</button>
+        <button type="button" class="btn" id="btnBatalForm">Batal</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="view" id="v-kalender" hidden>
+    <div class="card"><div id="calPage"></div></div>
+    <div class="card"><h3 id="agendaJudul">Daftar Agenda</h3><div id="agenda"></div></div>
+  </section>
+
+  <section class="view" id="v-pemesan" hidden>
+    <div class="card">
+      <div class="toolbar"><input id="qPemesan" type="search" placeholder="🔍 Cari nama / nomor WhatsApp"></div>
+      <div class="table-wrap"><table id="tblPemesan"></table></div>
+    </div>
+  </section>
+
+  <section class="view" id="v-laporan" hidden>
+    <div class="card">
+      <div class="toolbar">
+        <label class="inline">Dari <input id="rDari" type="date"></label>
+        <label class="inline">Sampai <input id="rSampai" type="date"></label>
+        <button class="btn" id="rReset">Semua Periode</button>
+        <button class="btn" id="btnCsvLaporan">⬇️ Ekspor CSV</button>
+      </div>
+      <p class="muted">Total honor, DP, dan sisa tidak menghitung job berstatus dibatalkan.</p>
+      <div class="stats" id="rTotal"></div>
+    </div>
+    <div class="card"><h3>Job per Bulan</h3><div class="table-wrap"><table id="tblBulan"></table></div></div>
+    <div class="card"><h3>Daftar Job Berdasarkan Status</h3><div class="table-wrap"><table id="tblStatus"></table></div></div>
+  </section>
+
+  <section class="view" id="v-keuangan" hidden>
+    <div class="card">
+      <div class="toolbar">
+        <label class="inline">Dari <input id="kDari" type="date"></label>
+        <label class="inline">Sampai <input id="kSampai" type="date"></label>
+        <button class="btn" id="kReset">Semua Periode</button>
+        <button class="btn" id="btnCsvKas">⬇️ Ekspor CSV</button>
+      </div>
+      <p class="muted">Pemasukan dari job dihitung otomatis dari DP/pembayaran job (selain yang dibatalkan), bertanggal sesuai tanggal acara. Piutang = total sisa pembayaran seluruh job aktif.</p>
+      <div class="stats" id="kStat"></div>
+    </div>
+    <form id="kForm" class="card" novalidate>
+      <h3>Catat Transaksi</h3>
+      <div class="form-grid">
+        <label>Tanggal *<input id="kTgl" type="date"></label>
+        <label>Jenis<select id="kJenis"><option value="keluar">Pengeluaran</option><option value="masuk">Pemasukan</option></select></label>
+        <label>Kategori<select id="kKat"></select></label>
+        <label>Keterangan *<input id="kKet" placeholder="Contoh: Transport anggota"></label>
+        <label>Jumlah (Rp) *<input id="kJml" type="number" min="0" inputmode="numeric"></label>
+        <label>Job Terkait (opsional)<select id="kJob"></select></label>
+      </div>
+      <button type="submit" class="btn gold">💾 Simpan Transaksi</button>
+    </form>
+    <div class="card"><h3>Buku Kas</h3><div class="table-wrap"><table id="tblKas"></table></div></div>
+    <div class="card"><h3>Pengeluaran per Kategori</h3><div class="table-wrap"><table id="tblKat"></table></div></div>
+  </section>
+
+  <section class="view" id="v-pengaturan" hidden>
+    <div class="card admin-only">
+      <h3>Daftar Grup Hadroh</h3>
+      <p class="muted">Satu nama grup per baris. Dipakai sebagai saran pada formulir.</p>
+      <textarea id="setGrup" rows="4"></textarea>
+      <div class="toolbar"><button class="btn gold" id="btnSimpanGrup">Simpan Daftar Grup</button></div>
+    </div>
+    <div class="card admin-only">
+      <h3>Cadangkan &amp; Pulihkan</h3>
+      <div class="toolbar">
+        <button class="btn" id="btnBackup">⬇️ Cadangkan (JSON)</button>
+        <label class="btn">⬆️ Pulihkan (JSON)<input id="fileRestore" type="file" accept=".json,application/json" hidden></label>
+      </div>
+      <p class="muted">Data tersimpan di database Supabase dan tersinkron antarperangkat. Cadangan JSON berguna sebagai arsip dan untuk memasukkan data lama.</p>
+    </div>
+    <div class="card admin-only">
+      <h3>Data Contoh &amp; Reset</h3>
+      <div class="toolbar">
+        <button class="btn" id="btnMuatContoh">Muat Data Contoh</button>
+        <button class="btn danger" id="btnHapusContoh">Hapus Data Contoh</button>
+        <button class="btn danger" id="btnHapusSemua">Hapus Semua Data</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div id="modal" class="modal" hidden>
+  <div class="modal-box">
+    <h3 id="mTitle"></h3><div id="mBody"></div>
+    <div class="toolbar end"><button class="btn" id="mCancel">Batal</button><button class="btn gold" id="mOk">OK</button></div>
+  </div>
+</div>
+<div id="login" class="login">
+  <form id="lForm" class="card">
+    <div class="brand"><span class="logo">🕌</span><div><b>JOB HADROH</b><small>Masuk untuk melanjutkan</small></div></div>
+    <div class="form-grid" style="grid-template-columns:1fr">
+      <label>Email<input id="lEmail" type="email" autocomplete="username" required></label>
+      <label>Kata Sandi<input id="lPass" type="password" autocomplete="current-password" required></label>
+    </div>
+    <p id="lErr" class="out"></p>
+    <button class="btn gold" type="submit">Masuk</button>
+  </form>
+</div>
+<div id="toasts"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="config.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
